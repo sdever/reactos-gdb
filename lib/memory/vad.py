@@ -102,7 +102,7 @@ def print_vad_tree(depth, addr):
 
     vad_type = "ARM3 VAD" if is_arm3_vad(vadroot) else "Ros VAD"
     filename = get_vad_section_file(vadroot)
-    fmt = "".join(["0x%-10x", "%-7d", "0x%-10x", "0x%-10x", "%-10s", "%-15s", "%-50s"])                
+    fmt = "".join(["0x%-10x", "%-7d", "0x%-10x", "0x%-10x", "%-15s", "%-50s"])                
     print(fmt % 
         (
             int(vadroot),
