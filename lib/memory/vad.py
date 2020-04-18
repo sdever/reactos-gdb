@@ -16,9 +16,8 @@ def find_vad_by_addr(addr, value):
         # We are not a MM_AVL_TABLE root
         to_check = value // 4096
         starting = int(vadnode["StartingVpn"])
-        ending = int(vadnode["StartingVpn"])
-
-        if  starting >= to_check and ending <= to_check:
+        ending = int(vadnode["EndingVpn"])
+        if  starting <= to_check and to_check <= ending:
             return vadnode
         
         # Explore children
