@@ -11,6 +11,8 @@ Type `source /where/you/downloaded/rosdbg.py` in your gdb debugging session. To 
  - `pslist`: Prints the list of processes, without the PsInitialProcess
  - `vadtree`: Dumps the VAD tree of a VAD root.
  - `vadinfo`: Prints information about a specific VAD
+ - `gflags`: Prints currently set gflags
+ - `gflags [+|-]gflag` Sets or disable a gflag
 
 ## Implemented functions
  - `$getpcr()`: Returns a pointer to the first PCR of a process
