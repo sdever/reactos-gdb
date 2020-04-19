@@ -7,6 +7,7 @@ already returns a lot of information on threads)
 from lib.utils import get_type, offsetof, pvoid, FunctionWrapper, \
     CommandWrapper
 from lib.memory.vad import find_vad_by_addr, get_vad_section_file
+from lib.pcr import get_running_process
 import gdb
 
 """
@@ -72,13 +73,17 @@ class GetPsList(gdb.Command):
 GetPsList()
 
 def get_vad_from_addr(*args):
-    if len(args) != 2:
+    if len(args) not in [1,2]:
         print("Usage: $psaddr(<pid>,<vaddr>)")
         return 0
     EPROCESS = get_type("EPROCESS")
-    pid = int(args[0])
-    addr = int(args[1])
-    ps = find_by_pid(pid)
+    if len(args) == 2:
+        pid = int(args[0])
+        addr = int(args[1])
+        ps = find_by_pid(pid)
+    else:
+        addr = int(args[0])
+        ps = get_running_process()
     if not ps:
         return -1
     vad_root = gdb.Value(int(ps) + (EPROCESS["VadRoot"].bitpos // 8))

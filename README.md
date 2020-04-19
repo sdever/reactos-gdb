@@ -18,4 +18,5 @@ Type `source /where/you/downloaded/rosdbg.py` in your gdb debugging session. To 
  - `$getpcr()`: Returns a pointer to the first PCR of a process
  - `$curproc()`: Returns a pointer to the current _EPROCESS to the current thread in the PCR
  - `$curthread()`: Returns the current _ETHREAD in the PCR
- - `$psaddr(pid, addr)`: Returns a pointer to the VAD which represents the virtual address.
+ - `$psaddr(pid, addr)`: Returns a pointer to the VAD describing the virtual address for a given PID.
+ - `$psaddr(addr)`: Return a pointer to the VAD describind the virtual address for the current process
