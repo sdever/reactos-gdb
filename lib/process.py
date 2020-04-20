@@ -93,3 +93,16 @@ def get_vad_from_addr(*args):
     return ret
 
 FunctionWrapper("psaddr", get_vad_from_addr)
+
+# Dedicated command to kill a process
+def kill_process(arg, from_tty=False):
+    try:
+        ps = gdb.parse_and_eval(arg)
+    except Exception:
+        print("Invalid expression given")
+        return
+    gdb.execute("set ExpDebuggerProcessKill = 0x%x" % ps)
+    gdb.execute("set ExpDebuggerWork = 1")
+    gdb.execute("c")
+
+CommandWrapper("pskill", kill_process)
