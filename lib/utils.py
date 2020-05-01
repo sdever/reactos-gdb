@@ -31,7 +31,7 @@ def CommandWrapper(command, fn):
 
 pvoid = gdb.lookup_type('void').pointer()
 
-def offsetof(ptr, type, attr):
+def containing_record(ptr, type, attr):
     """
     Gets the original type from a pointer to a member
     @arg ptr: a gdb.Value representing the pointer to the attribute
@@ -50,3 +50,11 @@ def get_type(tn):
         pass
     gdb.execute("sharedlibrary")
     return gdb.lookup_type(tn)
+
+def get_symbol_value(sn):
+    try:
+        return gdb.get_symbol(sn).value()
+    except Exception:
+        pass
+    gdb.execute("sharedlibrary")
+    return gdb.get_symbol(sn).value()

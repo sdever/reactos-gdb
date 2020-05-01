@@ -1,5 +1,5 @@
 import gdb
-from lib.utils import FunctionWrapper, get_type, offsetof, CommandWrapper
+from lib.utils import FunctionWrapper, get_type, containing_record, CommandWrapper
 
 #region Utilities functions to manipulate VAD tree
 def find_vad_by_addr(addr, value):

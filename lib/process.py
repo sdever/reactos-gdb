@@ -3,9 +3,11 @@
 Handle ReactOS processes and threads support (mostly processes, since gdb
 already returns a lot of information on threads)
 """
+current_thread = None
+current_process = None
 
-from lib.utils import get_type, offsetof, pvoid, FunctionWrapper, \
-    CommandWrapper
+from lib.utils import get_type, containing_record, pvoid, FunctionWrapper, \
+    CommandWrapper, get_symbol_value
 from lib.memory.vad import find_vad_by_addr, get_vad_section_file
 from lib.pcr import get_running_process
 import gdb
@@ -22,7 +24,7 @@ def ProcessWalk(fn):
     head_ref = z.cast(pvoid)
     next = z["Flink"]
     while int(next) != int(head_ref):
-        ps = offsetof(next, EPROCESS, "ActiveProcessLinks")
+        ps = containing_record(next, EPROCESS, "ActiveProcessLinks")
         ret = fn(ps)
         if not ret:
             next = next["Flink"]
@@ -83,7 +85,7 @@ def get_vad_from_addr(*args):
         ps = find_by_pid(pid)
     else:
         addr = int(args[0])
-        ps = get_running_process()
+        ps = get_current_process()
     if not ps:
         return -1
     vad_root = gdb.Value(int(ps) + (EPROCESS["VadRoot"].bitpos // 8))
@@ -105,4 +107,41 @@ def kill_process(arg, from_tty=False):
     gdb.execute("set ExpDebuggerWork = 1")
     gdb.execute("c")
 
+def get_current_process(*args):
+    """
+    Get the current process being run by kdgdb. It differs from the
+    current thread in the PCR if kdbg attaches to another thread.
+    It makes more sense for curproc to return it instead of the PCR
+    one
+    """
+    global current_process
+    EPROCESS = get_type("EPROCESS")
+    KPROCESS = get_type("KPROCESS")
+    ETHREAD = get_type("ETHREAD")
+    KTHREAD = get_type("KTHREAD")
+    tid = gdb.parse_and_eval("gdb_dbg_tid")
+    if current_thread and current_thread["Cid"]["UniqueThread"] == (tid - 1):
+        return current_process
+    
+    def search_fun(ps):
+        global current_process, current_thread
+        pcb = gdb.Value(int(ps) + \
+            (EPROCESS["Pcb"].bitpos // 8)).cast(KPROCESS.pointer())
+        th_head = gdb.Value(int(pcb) + \
+            (KPROCESS["ThreadListHead"].bitpos // 8))
+        th_head = th_head.cast(get_type("LIST_ENTRY").pointer())
+        next = th_head['Flink']
+        while int(next) != int(th_head):
+            th = containing_record(next, KTHREAD, "ThreadListEntry")
+            eth = th.cast(ETHREAD.pointer())
+            if eth["Cid"]["UniqueThread"] == (tid - 1):
+                current_thread = eth
+                current_process = ps
+                return ps
+            next = next["Flink"]
+        return False
+    return ProcessWalk(search_fun)
+    
+
 CommandWrapper("pskill", kill_process)
+FunctionWrapper("dbgproc", get_current_process)
