@@ -15,8 +15,8 @@ if os.path.islink(THISFILE):
     PEDAFILE = os.readlink(THISFILE)
 sys.path.insert(0, os.path.dirname(THISFILE))
 
-reload("lib.memory.vad")
 reload("lib.utils")
+reload("lib.memory.vad")
 reload("lib.process")
 reload("lib.pcr")
 reload("lib.obmgr")
